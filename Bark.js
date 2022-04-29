@@ -19,7 +19,11 @@ class Bark {
   _handleRequest(req, res) {
     let stack = this._stack;
     let i = 0;
-    const reqUrl = req.url;
+    //todo remove query params from url if it exists
+    let reqUrl = req.url;
+    if (req.url.includes("?")) reqUrl = req.url.split("?")[0];
+    //remove params from url if it exists
+
     const reqMethod = req.method;
     const reqCode = `${reqMethod}_${reqUrl}`;
     //add custom data send to the request
@@ -36,10 +40,10 @@ class Bark {
     // });
 
     //add query to the request if exist
-    let queries = queryParse(req.url);
-    req.query = queries;
+    req.query = queryParse(req.url);
 
     //check if the url with the method exists in the routing map
+    console.log({ reqCode });
     if (this._routingMap.has(reqCode)) {
       let next = () => {
         if (i < stack.length) stack[i++](req, res, next);
