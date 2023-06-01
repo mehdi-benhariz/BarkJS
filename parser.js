@@ -13,13 +13,13 @@ function queryParse(url) {
   }, {});
   return params;
 }
+
 function paramParse(url) {
   let str = "";
 
   for (var i = 0; i < url.length; i++) {
     const c = url.charAt(i);
     if (c === ":") {
-      // eat all characters
       let param = "";
       for (var j = i + 1; j < url.length; j++) {
         if (/\w/.test(url.charAt(j))) param += url.charAt(j);
@@ -31,6 +31,7 @@ function paramParse(url) {
   }
   return str;
 }
+
 module.exports = {
   queryParse,
   paramParse,

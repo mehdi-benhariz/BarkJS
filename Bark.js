@@ -1,12 +1,5 @@
 const http = require("http");
-const { queryParse, paramParse } = require("./parser.js");
-const URLErrorHandler = (url, middleware, cb) => {
-  if (typeof url !== "string") throw new Error("URL must be a string");
-  if (![Array, "function", "object"].includes(typeof middleware))
-    throw new Error("Middleware must be a function or an array of functions");
-  if (!["function"].includes(typeof cb))
-    throw new Error("CallBack must be a function");
-};
+const { parse: queryParse } = require("querystring");
 
 class Bark {
   constructor() {
@@ -15,84 +8,92 @@ class Bark {
     this._routingMap = new Map();
     return this;
   }
-
+   
   _handleRequest(req, res) {
     let stack = this._stack;
     let i = 0;
-    //todo remove query params from url if it exists
-    let reqUrl = req.url;
-    if (req.url.includes("?")) reqUrl = req.url.split("?")[0];
-    //remove params from url if it exists
 
-    const reqMethod = req.method;
-    const reqCode = `${reqMethod}_${reqUrl}`;
-    //add custom data send to the request
-    res.send = (data) => res.end(data);
-    res.status = (status = 200) =>
-      res.writeHead(status, "OK", { "Content-Type": "application/json" });
-    //add params to the request if exist
-    req.params = {};
-    req.params = paramParse(req.url);
-    req.bla = "bla bla";
-    // reqUrl.split("/").forEach((param, index) => {
-    //   if (index === 0) return;
-    //   req.params[param] = param;
-    // });
+    // Parse query
+    const queryParams = req.url.split("?")[1];
+    req.query = queryParams? queryParse(queryParams) : {};
+    
+    // Parse body
+    let body = "";
+    req.on("data", (chunk) => (body += chunk.toString()));
+    req.on("end", () => {
+      req.body = body ? queryParse(body) : {};
 
-    //add query to the request if exist
-    req.query = queryParse(req.url);
-
-    //check if the url with the method exists in the routing map
-    console.log({ reqCode });
-    if (this._routingMap.has(reqCode)) {
       let next = () => {
         if (i < stack.length) stack[i++](req, res, next);
         else res.end("404");
       };
-      this._routingMap.get(reqCode).cb(req, res, next);
-    }
-  }
-  // use(middleware) {
-  //   if (typeof middleware !== "function")
-  //     throw new Error("Middleware must be a function");
+      next();
+    });
 
-  //   this._stack.push(middleware);
-  // }
-  //handle endpoints with different methods : Bark.Routing().get(url,[middleware] ,callback)
-  Routing = () => ({
-    get: (...args) => {
-      let cb = args.pop();
-      let [url, ...middleware] = args;
-      URLErrorHandler(url, middleware, cb);
-      const code = `GET_${url}`;
-      //check if the url with specific method exist in routing map
-      if (this._routingMap.has(code))
-        throw new Error("this endpoints already exist");
-      //adding the callback function
-      this._routingMap.set(code, { cb });
-      //adding the list of middlewares
-    },
-    post: (req, res, next) => {
-      res.end("POST");
-    },
-    put: (req, res, next) => {
-      res.end("PUT");
-    },
-    delete: (req, res, next) => {
-      res.end("DELETE");
-    },
-    patch: (req, res, next) => {
-      res.end("PATCH");
-    },
-  });
+  }
+
+  use(middleware) {
+    if (typeof middleware !== "function")
+      throw new Error("Middleware must be a function 😥");
+
+    this._stack.push(middleware);
+  }
 
   listen(port, callback) {
-    try {
-      this._server.listen(port);
-      if (callback) callback();
-    } catch (error) {
-      cb(`error occured while starting server.`);
-    }
+    this._server.listen(port);
+    if (callback) callback();
+  }
+
+  Routing() {
+    const self = this;
+    const methods = ["get", "post", "put", "delete", "patch"];
+    
+    const tempRoutingHandler = (url, method, ...middleware) => {
+      if (typeof url !== "string") {
+        throw new Error("URL must be a string 😥 ");
+      }
+      if (!methods.includes(method)) {
+        throw new Error("Method not supported 😥 ");
+      }
+      self._addRoute(method.toUpperCase(), url, middleware);
+      return routingHandler;
+    };
+    
+    const routingHandler = {
+      get(url, ...middleware) {
+        return tempRoutingHandler(url, "get", ...middleware);
+      },
+      post(url, ...middleware) {
+        return tempRoutingHandler(url, "post", ...middleware);
+      },
+      put(url, ...middleware) {
+        return tempRoutingHandler(url, "put", ...middleware);
+      },
+      delete(url, ...middleware) {
+        return tempRoutingHandler(url, "delete", ...middleware);
+      },
+      patch(url, ...middleware) {
+        return tempRoutingHandler(url, "patch", ...middleware);
+      },
+    };
+    
+    return routingHandler;
+  }
+  
+
+  _addRoute(method, url, middleware) {
+    const routeKey = `${method}_${url}`;
+    const callback = middleware.pop();
+
+    if (typeof callback !== "function")
+      throw new Error("Callback must be a function 😥 ");
+
+    const route = {
+      middleware,
+      callback,
+    };
+
+    this._routingMap.set(routeKey, route);
   }
 }
 
