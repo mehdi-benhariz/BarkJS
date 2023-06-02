@@ -12,25 +12,48 @@ class Bark {
   _handleRequest(req, res) {
     let stack = this._stack;
     let i = 0;
-
+  
     // Parse query
     const queryParams = req.url.split("?")[1];
-    req.query = queryParams? queryParse(queryParams) : {};
-    
+    req.query = queryParams ? queryParse(queryParams) : {};
+  
     // Parse body
     let body = "";
     req.on("data", (chunk) => (body += chunk.toString()));
     req.on("end", () => {
       req.body = body ? queryParse(body) : {};
-
+  
       let next = () => {
-        if (i < stack.length) stack[i++](req, res, next);
-        else res.end("404");
+        if (i < stack.length) {
+          stack[i++](req, res, next);
+        } else {
+          const routeKey = `${req.method}_${req.url}`;
+  
+          if (this._routingMap.has(routeKey)) {
+            const route = this._routingMap.get(routeKey);
+            const middlewareStack = route.middleware;
+            let j = 0;
+  
+            const routeNext = () => {
+              if (j < middlewareStack.length) {
+                middlewareStack[j++](req, res, routeNext);
+              } else {
+                route.callback(req, res);
+              }
+            };
+  
+            routeNext();
+          } else {
+            res.statusCode = 404;
+            res.end("Not Found");
+          }
+        }
       };
+  
       next();
     });
-
   }
+  
 
   use(middleware) {
     if (typeof middleware !== "function")
