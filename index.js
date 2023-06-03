@@ -2,11 +2,6 @@ const Bark = require("./Bark.js");
 const app = new Bark();
 
 app.Routing()
-  // .get("/", (req, res, next) => {
-  //   res.send(req.bla).status(200);
-  //   console.log("it works!\n");
-  //   next();
-  // })
   .get("/test", (req, res) => {
     console.log(req.query);
     console.log("it works!\n");
