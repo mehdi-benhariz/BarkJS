@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2.4.3
+        uses: actions/checkout@v2
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -25,7 +25,7 @@ jobs:
         run: npm run test
       
       - name: Create Pull Request
-        uses: mehdi-benhariz/BarkJS@v1
+        uses: mehdi-benhariz/BarkJS@v0.2
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           branch: dev
