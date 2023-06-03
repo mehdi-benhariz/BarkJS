@@ -12,6 +12,7 @@ jobs:
       run:
         shell: bash
         working-directory: .
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -27,8 +28,12 @@ jobs:
       - name: Run tests
         run: npm run test
       
+  create_pull_request:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
       - name: Create Pull Request
-        uses: mehdi-benhariz/BarkJS/.github/workflows/test.yaml@dev
+        uses: mehdi-benhariz/BarkJS@dev
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           branch: dev
