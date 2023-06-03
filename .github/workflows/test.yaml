@@ -8,7 +8,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    using: 'node16'
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
