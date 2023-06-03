@@ -23,3 +23,12 @@ jobs:
 
       - name: Run tests
         run: npm run test
+      
+      - name: Create Pull Request
+        uses: mehdi-benhariz/create-pull-request@v1
+        with:
+          token: ${{ secrets.MY_GITHUB_TOKENgit }}
+          branch: dev
+          title: Automated Pull Request from CI
+          body: Automated Pull Request created when tests passed
+          base: main
