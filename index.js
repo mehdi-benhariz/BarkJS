@@ -16,6 +16,8 @@ app.Routing()
     console.log(req.body);
     console.log("Post works!\n");
     res.end();
+  }).get("/" , (req,res)=>{
+    res.ibaath("get")
   })
 
 app.listen(3000, () => console.log("Server is running!"));
