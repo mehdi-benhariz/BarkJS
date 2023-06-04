@@ -27,7 +27,7 @@ jobs:
 
       - name: Run tests
         run: npm run test
-      
+        
   create_pull_request:
     needs: test
     runs-on: ubuntu-latest
