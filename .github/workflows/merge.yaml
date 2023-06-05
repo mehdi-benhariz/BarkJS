@@ -24,7 +24,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+      - name: Set up Git
+        run: |
+          git config --global user.name "mehdi-benhariz"
+          git config --global user.email "benharizmehdi20@gmail.com" 
       - name: Fetch the branch
         run: |
           git config --global pull.rebase false
