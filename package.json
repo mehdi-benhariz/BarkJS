@@ -6,7 +6,8 @@
   "scripts": {
     "start:dev":"node --watch index.js",
     "start": "node index.js",
-    "test": "jest --watchAll --verbose"
+    "test:dev": "jest --watchAll --verbose",
+    "test": "jest --verbose"
   },
   "keywords": [],
   "author": "",
