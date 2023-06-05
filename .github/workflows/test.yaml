@@ -32,6 +32,9 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
       - name: Create Pull Request
         uses: mehdi-benhariz/BarkJS@dev
         with:
