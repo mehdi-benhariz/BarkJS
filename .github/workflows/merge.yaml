@@ -25,5 +25,5 @@ jobs:
 
       - name: Merge dev into main
         run: |
-          git checkout main
+          git checkout origin/main
           git merge --ff-only dev
